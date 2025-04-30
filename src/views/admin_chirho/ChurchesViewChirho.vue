@@ -1,40 +1,54 @@
 <!-- For God so loved the world, that He gave His only begotten Son, that all who believe in Him should not perish but have everlasting life. -->
 <template>
-  <div class="container mx-auto px-4 py-8">
+  <div class="churches-view-chirho">
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-2xl font-bold">Churches</h1>
       <button
-        @click="showCreateModal = true"
-        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+        @click="showCreateModalChirho = true"
+        class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
       >
-        Create Church
+        Add Church
       </button>
     </div>
 
-    <div class="bg-white shadow-md rounded-lg overflow-hidden">
-      <table class="min-w-full">
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+      <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Continent</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timezone</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Name
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Continent
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Timezone
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
-          <tr v-for="church in churches" :key="church.church_id_chirho">
-            <td class="px-6 py-4 whitespace-nowrap">{{ church.name_chirho }}</td>
-            <td class="px-6 py-4 whitespace-nowrap">{{ getContinentName(church.continent_id_chirho) }}</td>
-            <td class="px-6 py-4 whitespace-nowrap">{{ church.timezone_chirho }}</td>
+          <tr v-for="churchChirho in churchesChirho" :key="churchChirho.church_id_chirho">
+            <td class="px-6 py-4 whitespace-nowrap">
+              {{ churchChirho.name_chirho }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              {{ churchChirho.continent_id_chirho }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              {{ churchChirho.church_timezone_chirho }}
+            </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
               <button
-                @click="editChurch(church)"
-                class="text-indigo-600 hover:text-indigo-900 mr-3"
+                @click="editChurchChirho(churchChirho)"
+                class="text-indigo-600 hover:text-indigo-900 mr-4"
               >
                 Edit
               </button>
               <button
-                @click="deleteChurch(church.church_id_chirho)"
+                @click="deleteChurchChirho(churchChirho.church_id_chirho)"
                 class="text-red-600 hover:text-red-900"
               >
                 Delete
@@ -46,49 +60,42 @@
     </div>
 
     <!-- Create/Edit Modal -->
-    <div v-if="showCreateModal || showEditModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+    <div v-if="showCreateModalChirho" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
       <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
         <div class="mt-3 text-center">
           <h3 class="text-lg leading-6 font-medium text-gray-900">
-            {{ showCreateModal ? 'Create' : 'Edit' }} Church
+            {{ editingChurchChirho ? 'Edit Church' : 'Add New Church' }}
           </h3>
           <div class="mt-2 px-7 py-3">
             <input
-              v-model="form.name_chirho"
+              v-model="churchFormChirho.name_chirho"
               type="text"
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
               placeholder="Church Name"
-              class="mb-3 w-full px-3 py-2 border rounded"
             />
-            <select
-              v-model="form.continent_id_chirho"
-              class="mb-3 w-full px-3 py-2 border rounded"
-            >
-              <option value="">Select Continent</option>
-              <option
-                v-for="continent in continents"
-                :key="continent.continent_id_chirho"
-                :value="continent.continent_id_chirho"
-              >
-                {{ continent.name_chirho }}
-              </option>
-            </select>
             <input
-              v-model="form.timezone_chirho"
+              v-model="churchFormChirho.continent_id_chirho"
               type="text"
+              class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              placeholder="Continent ID"
+            />
+            <input
+              v-model="churchFormChirho.church_timezone_chirho"
+              type="text"
+              class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
               placeholder="Timezone"
-              class="w-full px-3 py-2 border rounded"
             />
           </div>
           <div class="items-center px-4 py-3">
             <button
-              @click="saveChurch"
-              class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
+              @click="saveChurchChirho"
+              class="px-4 py-2 bg-indigo-600 text-white text-base font-medium rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               Save
             </button>
             <button
-              @click="closeModal"
-              class="ml-3 px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300"
+              @click="showCreateModalChirho = false"
+              class="ml-3 px-4 py-2 bg-gray-200 text-gray-700 text-base font-medium rounded-md shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
             >
               Cancel
             </button>
@@ -101,83 +108,77 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import type { ChurchChirho, CreateChurchChirho, UpdateChurchChirho, ContinentChirho } from '@/types/models_chirho';
+import type { ChurchChirho, CreateChurchChirho, UpdateChurchChirho } from '@/types/models_chirho';
 import {
   getChurchesChirho,
   createChurchChirho,
   updateChurchChirho,
-  deleteChurchChirho,
-  getContinentsChirho
+  deleteChurchChirho
 } from '@/services/api_chirho';
 
-const churches = ref<ChurchChirho[]>([]);
-const continents = ref<ContinentChirho[]>([]);
-const showCreateModal = ref(false);
-const showEditModal = ref(false);
-const form = ref<CreateChurchChirho | UpdateChurchChirho>({
+const churchesChirho = ref<ChurchChirho[]>([]);
+const showCreateModalChirho = ref(false);
+const editingChurchChirho = ref<ChurchChirho | null>(null);
+const churchFormChirho = ref<CreateChurchChirho>({
   name_chirho: '',
   continent_id_chirho: '',
-  timezone_chirho: ''
+  church_timezone_chirho: ''
 });
 
-const loadData = async () => {
+const loadChurchesChirho = async () => {
   try {
-    [churches.value, continents.value] = await Promise.all([
-      getChurchesChirho(),
-      getContinentsChirho()
-    ]);
+    churchesChirho.value = await getChurchesChirho();
   } catch (error) {
-    console.error('Failed to load data:', error);
+    console.error('Failed to load churches:', error);
   }
 };
 
-const getContinentName = (continentId: string) => {
-  const continent = continents.value.find(c => c.continent_id_chirho === continentId);
-  return continent ? continent.name_chirho : 'Unknown';
+const editChurchChirho = (churchChirho: ChurchChirho) => {
+  editingChurchChirho.value = churchChirho;
+  churchFormChirho.value = {
+    name_chirho: churchChirho.name_chirho,
+    continent_id_chirho: churchChirho.continent_id_chirho,
+    church_timezone_chirho: churchChirho.church_timezone_chirho
+  };
+  showCreateModalChirho.value = true;
 };
 
-const saveChurch = async () => {
+const saveChurchChirho = async () => {
   try {
-    if (showCreateModal.value) {
-      await createChurchChirho(form.value as CreateChurchChirho);
+    if (editingChurchChirho.value) {
+      await updateChurchChirho(editingChurchChirho.value.church_id_chirho, churchFormChirho.value as UpdateChurchChirho);
     } else {
-      const churchId = (form.value as UpdateChurchChirho).church_id_chirho;
-      await updateChurchChirho(churchId, form.value as UpdateChurchChirho);
+      await createChurchChirho(churchFormChirho.value);
     }
-    await loadData();
-    closeModal();
+    await loadChurchesChirho();
+    showCreateModalChirho.value = false;
+    editingChurchChirho.value = null;
+    churchFormChirho.value = {
+      name_chirho: '',
+      continent_id_chirho: '',
+      church_timezone_chirho: ''
+    };
   } catch (error) {
     console.error('Failed to save church:', error);
   }
 };
 
-const editChurch = (church: ChurchChirho) => {
-  form.value = { ...church };
-  showEditModal.value = true;
-};
-
-const deleteChurch = async (churchId: string) => {
-  if (confirm('Are you sure you want to delete this church?')) {
-    try {
-      await deleteChurchChirho(churchId);
-      await loadData();
-    } catch (error) {
-      console.error('Failed to delete church:', error);
-    }
+const deleteChurchChirho = async (churchIdChirho: string) => {
+  try {
+    await deleteChurchChirho(churchIdChirho);
+    await loadChurchesChirho();
+  } catch (error) {
+    console.error('Failed to delete church:', error);
   }
 };
 
-const closeModal = () => {
-  showCreateModal.value = false;
-  showEditModal.value = false;
-  form.value = {
-    name_chirho: '',
-    continent_id_chirho: '',
-    timezone_chirho: ''
-  };
-};
-
 onMounted(() => {
-  loadData();
+  loadChurchesChirho();
 });
-</script> 
+</script>
+
+<style scoped>
+.churches-view-chirho {
+  @apply p-4;
+}
+</style> 

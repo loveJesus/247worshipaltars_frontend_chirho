@@ -5,11 +5,11 @@
         <div class="flex justify-between h-16">
           <div class="flex">
             <div class="flex-shrink-0 flex items-center">
-              <h1 class="text-xl font-bold text-gray-900">Worship Coordinator</h1>
+              <span class="text-xl font-bold">Worship Coordinator</span>
             </div>
             <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
               <router-link
-                to="/admin_chirho/"
+                to="/admin_chirho"
                 class="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                 active-class="border-indigo-500 text-gray-900"
                 exact
@@ -32,10 +32,10 @@
               </router-link>
             </div>
           </div>
-          <div class="hidden sm:ml-6 sm:flex sm:items-center">
+          <div class="flex items-center">
             <button
               @click="handleLogoutChirho"
-              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              class="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
               Logout
             </button>
@@ -60,7 +60,6 @@ const auth_store_chirho = useAuthStoreChirho();
 const handleLogoutChirho = async () => {
   try {
     await auth_store_chirho.logoutUserChirho();
-    router_chirho.push('/login_chirho');
   } catch (error) {
     console.error('Logout failed:', error);
   }

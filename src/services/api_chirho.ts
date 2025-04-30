@@ -31,8 +31,13 @@ const api_chirho = axios.create({
 // Add request interceptor for auth token
 api_chirho.interceptors.request.use((config_chirho) => {
   const token_chirho = localStorage.getItem('token_chirho');
+  console.log('Token from localStorage:', token_chirho);
+  console.log('Request URL:', config_chirho.url);
+  console.log('Request Headers:', config_chirho.headers);
+  
   if (token_chirho) {
     config_chirho.headers.Authorization = `Bearer ${token_chirho}`;
+    console.log('Authorization header set:', config_chirho.headers.Authorization);
   }
   return config_chirho;
 });
@@ -53,8 +58,11 @@ api_chirho.interceptors.response.use(
 // Auth endpoints
 export const loginChirho = async (credentials_chirho: LoginRequestChirho): Promise<LoginResponseChirho> => {
   const response_chirho = await api_chirho.post('/api_chirho/admin_chirho/auth_chirho/login_chirho', credentials_chirho);
+  console.log('Login response:', response_chirho.data);
   const { token_chirho } = response_chirho.data;
+  console.log('Token from response:', token_chirho);
   localStorage.setItem('token_chirho', token_chirho);
+  console.log('Token stored in localStorage:', localStorage.getItem('token_chirho'));
   return response_chirho.data;
 };
 

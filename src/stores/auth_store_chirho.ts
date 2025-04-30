@@ -4,22 +4,26 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { loginChirho, logoutChirho } from '@/services/api_chirho';
 import type { LoginRequestChirho } from '@/types/models_chirho';
+import { useRouter } from 'vue-router';
 
 export const useAuthStoreChirho = defineStore('auth_chirho', () => {
+  const router = useRouter();
   const isAuthenticatedChirho = ref(!!localStorage.getItem('token_chirho'));
   const loadingChirho = ref(false);
   const errorChirho = ref<string | null>(null);
 
-  async function loginUserChirho(credentials: LoginRequestChirho) {
+  async function loginUserChirho(credentials_chirho: LoginRequestChirho) {
     loadingChirho.value = true;
     errorChirho.value = null;
     
     try {
-      await loginChirho(credentials);
+      const response_chirho = await loginChirho(credentials_chirho);
+      localStorage.setItem('token_chirho', response_chirho.token_chirho);
       isAuthenticatedChirho.value = true;
-    } catch (error) {
+      router.push({ name: 'dashboard_chirho' });
+    } catch (error_chirho) {
       errorChirho.value = 'Failed to login. Please check your credentials.';
-      throw error;
+      throw error_chirho;
     } finally {
       loadingChirho.value = false;
     }
@@ -33,9 +37,10 @@ export const useAuthStoreChirho = defineStore('auth_chirho', () => {
       await logoutChirho();
       localStorage.removeItem('token_chirho');
       isAuthenticatedChirho.value = false;
-    } catch (error) {
+      router.push({ name: 'login_chirho' });
+    } catch (error_chirho) {
       errorChirho.value = 'Failed to logout.';
-      throw error;
+      throw error_chirho;
     } finally {
       loadingChirho.value = false;
     }

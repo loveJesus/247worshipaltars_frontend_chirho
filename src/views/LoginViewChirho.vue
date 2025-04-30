@@ -34,11 +34,15 @@
           </div>
         </div>
 
+        <div v-if="error" class="text-red-500 text-sm text-center">
+          {{ error }}
+        </div>
+
         <div>
           <button
             type="submit"
             class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            :disabled="loading"
+            :disabled="loading_chirho"
           >
             <span class="absolute left-0 inset-y-0 flex items-center pl-3">
               <svg
@@ -74,14 +78,17 @@ const authStore_chirho = useAuthStoreChirho();
 const username_chirho = ref('');
 const password_chirho = ref('');
 const loading_chirho = ref(false);
+const error = ref('');
 
 const handleLogin = async () => {
   try {
     loading_chirho.value = true;
+    error.value = '';
     await authStore_chirho.loginUserChirho({ username_chirho: username_chirho.value, password_chirho: password_chirho.value });
-    router_chirho.push('/');
-  } catch (error) {
-    console.error('Login failed:', error);
+    router_chirho.push('/admin_chirho');
+  } catch (error_chirho) {
+    console.error('Login failed:', error_chirho);
+    error.value = 'Invalid username or password';
   } finally {
     loading_chirho.value = false;
   }
