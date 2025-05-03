@@ -190,8 +190,8 @@ export const updateHourlySignupChirho = async (signup_id_chirho: string, signup_
   return response_chirho.data;
 };
 
-export const deleteHourlySignupChirho = async (signup_id_chirho: string): Promise<void> => {
-  await api_chirho.delete(`/api_chirho/admin_chirho/hourly_signups_chirho/${signup_id_chirho}`);
+export const deleteHourlySignupChirho = async (signup_id_chirho: string, church_token_chirho: string): Promise<void> => {
+  await api_chirho.delete(`/api_chirho/public_chirho/church_chirho/${church_token_chirho}/signup_chirho/${signup_id_chirho}`);
 };
 
 // Public endpoints
@@ -226,4 +226,14 @@ export const getChurchByTokenChirho = async (tokenChirho: string): Promise<Churc
     throw new Error('Failed to fetch church');
   }
   return response.json();
+};
+
+export const getScheduleSignupsChirho = async (
+  church_token_chirho: string,
+  schedule_id_chirho: string
+): Promise<HourlySignupChirho[]> => {
+  const response_chirho = await api_chirho.get<HourlySignupChirho[]>(
+    `/api_chirho/public_chirho/church_chirho/${church_token_chirho}/schedule_chirho/${schedule_id_chirho}/signups_chirho`
+  );
+  return response_chirho.data;
 }; 
