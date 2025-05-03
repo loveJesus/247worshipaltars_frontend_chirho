@@ -11,12 +11,13 @@ export interface ContinentChirho {
 export interface ChurchChirho {
   church_id_chirho: string;
   name_chirho: string;
-  continent_id_chirho: string;
+  continent_id_chirho: string | null;
+  continent_name_chirho: string | null;
   church_timezone_chirho: string;
-  leader_name_chirho: string;
-  leader_email_chirho: string;
-  admin_details_note_chirho: string;
-  internal_notes_chirho: string;
+  leader_name_chirho: string | null;
+  leader_email_chirho: string | null;
+  admin_details_note_chirho: string | null;
+  internal_notes_chirho: string | null;
   member_access_token_chirho: string;
   created_timestamp_chirho: string;
   updated_timestamp_chirho: string;

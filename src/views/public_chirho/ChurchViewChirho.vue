@@ -21,15 +21,14 @@
                 <p class="mt-1 text-lg text-gray-900">{{ churchChirho.leader_email_chirho || 'Not specified' }}</p>
               </div>
               <div>
+                <h2 class="text-sm font-medium text-gray-500">Continent</h2>
+                <p class="mt-1 text-lg text-gray-900">{{ churchChirho.continent_name_chirho || 'Not specified' }}</p>
+              </div>
+              <div>
                 <h2 class="text-sm font-medium text-gray-500">Timezone</h2>
                 <p class="mt-1 text-lg text-gray-900">{{ churchChirho.church_timezone_chirho }}</p>
               </div>
-              <div>
-                <h2 class="text-sm font-medium text-gray-500">Worship Start Time</h2>
-                <p class="mt-1 text-lg text-gray-900">
-                  {{ formatWorshipStartTimeChirho() }}
-                </p>
-              </div>
+              
             </div>
             
             <div class="space-y-4">
@@ -45,12 +44,27 @@
                 <h2 class="text-sm font-medium text-gray-500">Last Updated</h2>
                 <p class="mt-1 text-lg text-gray-900">{{ formatDateChirho(churchChirho.updated_timestamp_chirho) }}</p>
               </div>
+              <div>
+                <h2 class="text-sm font-medium text-gray-500">Worship Start Time</h2>
+                <p class="mt-1 text-lg text-gray-900">
+                  {{ formatWorshipStartTimeChirho() }}
+                </p>
+              </div>
             </div>
           </div>
 
-          <div v-if="churchChirho.admin_details_note_chirho" class="mt-8">
-            <h2 class="text-lg font-medium text-gray-900 mb-2">Admin Notes</h2>
-            <p class="text-gray-700 whitespace-pre-line">{{ churchChirho.admin_details_note_chirho }}</p>
+          <div v-if="churchChirho.internal_notes_chirho" class="mt-8">
+            <h2 class="text-lg font-medium text-gray-900 mb-2">Public Notes</h2>
+            <p class="text-gray-700 whitespace-pre-line">{{ churchChirho.internal_notes_chirho }}</p>
+          </div>
+
+          <div class="mt-8">
+            <button 
+              @click="exportScheduleToMarkdownChirho"
+              class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+            >
+              Export Schedule to Markdown
+            </button>
           </div>
         </div>
       </div>
@@ -75,7 +89,7 @@
               
               <!-- 24-hour grid -->
               <div class="grid grid-cols-1 gap-2">
-                <div v-for="hourChirho in 24" :key="hourChirho" class="border rounded p-2">
+                <div v-for="(itemChirho, hourChirho) in 24" :key="hourChirho" class="border rounded p-2">
                   <!-- Next day header -->
                   <div v-if="churchChirho.worship_start_hour_chirho + hourChirho === 25" class="mb-2 pb-2 border-b">
                     <h4 class="text-sm font-semibold text-gray-700">
@@ -230,6 +244,7 @@ const formatDateChirho = (dateStringChirho: string) => {
 };
 
 const formatWorshipStartTimeChirho = () => {
+
   if (!churchChirho.value) return '';
   
   const start_hour_chirho = churchChirho.value.worship_start_hour_chirho;
@@ -251,6 +266,8 @@ const formatHourChirho = (hour_chirho: number, worship_date_chirho: string) => {
   
   // Get the start hour from the church response (this is the hour in the church's timezone)
   const start_hour_chirho = churchChirho.value?.worship_start_hour_chirho || 18;
+  console.log('start_hour_chirho', start_hour_chirho);
+  console.log('hour_chirho', hour_chirho);
   
   // Calculate the display hour (0-23) based on the start hour
   const display_hour_chirho = (start_hour_chirho + hour_chirho) % 24;
@@ -267,7 +284,7 @@ const formatHourChirho = (hour_chirho: number, worship_date_chirho: string) => {
   return worship_date_chirho_obj.toLocaleTimeString('en-US', {
     hour: 'numeric',
     hour12: true,
-    timeZone: churchChirho.value?.church_timezone_chirho || 'UTC'
+    //timeZone: churchChirho.value?.church_timezone_chirho || 'UTC'
   });
 };
 
@@ -474,6 +491,53 @@ const confirmDeleteSignupChirho = async () => {
   } catch (errorChirho) {
     console.error('Failed to delete signup:', errorChirho);
   }
+};
+
+const exportScheduleToMarkdownChirho = () => {
+  if (!upcomingSchedulesChirho.value.length) return;
+  
+  let markdownChirho = 'Hallelujah\n\n';
+  
+  for (const scheduleChirho of upcomingSchedulesChirho.value) {
+    const dateChirho = new Date(scheduleChirho.worship_date_chirho);
+    const dayNameChirho = dateChirho.toLocaleDateString('en-US', { weekday: 'long' });
+    const monthNameChirho = dateChirho.toLocaleDateString('en-US', { month: 'long' });
+    const dayChirho = dateChirho.getDate();
+    
+    markdownChirho += `${dayNameChirho}, ${monthNameChirho} ${dayChirho}\n`;
+    
+    // Get all signups for this schedule
+    const signupsChirho = hourlySignupsChirho.value[scheduleChirho.schedule_id_chirho] || [];
+    
+    // Group signups by hour
+    const signupsByHourChirho: { [key: number]: string[] } = {};
+    for (const signupChirho of signupsChirho) {
+      if (!signupsByHourChirho[signupChirho.slot_hour_chirho]) {
+        signupsByHourChirho[signupChirho.slot_hour_chirho] = [];
+      }
+      signupsByHourChirho[signupChirho.slot_hour_chirho].push(signupChirho.participant_name_chirho);
+    }
+    
+    // Add hours with signups, starting from worship start hour
+    const startHourChirho = churchChirho.value?.worship_start_hour_chirho || 18;
+    for (let i = 0; i < 24; i++) {
+      const hourChirho = (startHourChirho + i) % 24;
+      const hourStrChirho = hourChirho.toString().padStart(2, '0') + ':00';
+      const signupsChirho = signupsByHourChirho[hourChirho] || [];
+      
+      markdownChirho += `${hourStrChirho} ${signupsChirho.join(', ')}\n`;
+    }
+    
+    markdownChirho += '\n';
+  }
+  
+  // Copy to clipboard
+  navigator.clipboard.writeText(markdownChirho).then(() => {
+    alert('Schedule copied to clipboard!');
+  }).catch(err => {
+    console.error('Failed to copy schedule:', err);
+    alert('Failed to copy schedule to clipboard. Please try again.');
+  });
 };
 
 onMounted(() => {
