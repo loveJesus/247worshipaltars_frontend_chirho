@@ -31,6 +31,11 @@ const router_chirho = createRouter({
           path: 'churches_chirho',
           name: 'churches_chirho',
           component: () => import('@/views/admin_chirho/ChurchesViewChirho.vue')
+        },
+        {
+          path: 'schedules_chirho',
+          name: 'schedules_chirho',
+          component: () => import('@/views/admin_chirho/SchedulesViewChirho.vue')
         }
       ]
     },

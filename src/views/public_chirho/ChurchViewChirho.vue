@@ -5,7 +5,8 @@
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
     </div>
     <div v-else-if="churchChirho" class="max-w-4xl mx-auto px-4 py-8">
-      <div class="bg-white shadow rounded-lg overflow-hidden">
+      <!-- Church Details Section -->
+      <div class="bg-white shadow rounded-lg overflow-hidden mb-8">
         <div class="p-6">
           <h1 class="text-3xl font-bold text-gray-900 mb-4">{{ churchChirho.name_chirho }}</h1>
           
@@ -47,23 +48,135 @@
           </div>
         </div>
       </div>
+
+      <!-- Schedule Section -->
+      <div class="bg-white shadow rounded-lg overflow-hidden">
+        <div class="p-6">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-900">Worship Schedule</h2>
+            <div class="flex space-x-4">
+              <button 
+                @click="previousDayChirho" 
+                class="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+              >
+                Previous
+              </button>
+              <button 
+                @click="nextDayChirho" 
+                class="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+
+          <div v-if="scheduleLoadingChirho" class="flex justify-center items-center h-64">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+          </div>
+          <div v-else-if="scheduleChirho" class="space-y-6">
+            <div class="text-center mb-6">
+              <h3 class="text-xl font-semibold text-gray-900">
+                {{ formatDateChirho(scheduleChirho.worship_date_chirho) }}
+              </h3>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4">
+              <div v-for="hour in 24" :key="hour" class="p-4 border rounded-lg">
+                <div class="flex justify-between items-center">
+                  <div class="flex-1">
+                    <span class="font-medium">{{ formatHourChirho(hour - 1) }}</span>
+                  </div>
+                  <div class="flex-1 text-center">
+                    <span v-if="getSignupForHourChirho(hour - 1)" class="text-green-600">
+                      {{ getSignupForHourChirho(hour - 1)?.worshiper_name_chirho }}
+                    </span>
+                    <span v-else class="text-gray-400">Available</span>
+                  </div>
+                  <div class="flex-1 text-right">
+                    <button 
+                      v-if="!getSignupForHourChirho(hour - 1)"
+                      @click="openSignupModalChirho(hour - 1)"
+                      class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+                    >
+                      Sign Up
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-else class="text-center py-12">
+            <p class="text-gray-600">No schedule available for this date.</p>
+          </div>
+        </div>
+      </div>
     </div>
     <div v-else class="text-center py-12">
       <h2 class="text-2xl font-bold text-gray-900">Church not found</h2>
       <p class="mt-2 text-gray-600">The church you're looking for doesn't exist or has been removed.</p>
     </div>
+
+    <!-- Signup Modal -->
+    <div v-if="showSignupModalChirho" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+      <div class="bg-white rounded-lg p-6 max-w-md w-full">
+        <h3 class="text-xl font-bold mb-4">Sign Up for Worship</h3>
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Hour</label>
+          <p class="text-lg">{{ formatHourChirho(selectedHourChirho) }}</p>
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
+          <input 
+            v-model="signupNameChirho"
+            type="text"
+            class="w-full px-3 py-2 border rounded-md"
+            placeholder="Enter your name"
+          />
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Your Email</label>
+          <input 
+            v-model="signupEmailChirho"
+            type="email"
+            class="w-full px-3 py-2 border rounded-md"
+            placeholder="Enter your email"
+          />
+        </div>
+        <div class="flex justify-end space-x-4">
+          <button 
+            @click="closeSignupModalChirho"
+            class="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+          >
+            Cancel
+          </button>
+          <button 
+            @click="submitSignupChirho"
+            class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+          >
+            Submit
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
-import type { ChurchChirho } from '@/types/models_chirho';
-import { getChurchByTokenChirho } from '@/services/api_chirho';
+import type { ChurchChirho, ScheduleChirho, HourlySignupChirho } from '@/types/models_chirho';
+import { getChurchByTokenChirho, getScheduleChirho, createHourlySignupChirho } from '@/services/api_chirho';
 
 const route = useRoute();
 const churchChirho = ref<ChurchChirho | null>(null);
+const scheduleChirho = ref<ScheduleChirho | null>(null);
 const loadingChirho = ref(true);
+const scheduleLoadingChirho = ref(false);
+const showSignupModalChirho = ref(false);
+const selectedHourChirho = ref(0);
+const signupNameChirho = ref('');
+const signupEmailChirho = ref('');
+const currentDateChirho = ref(new Date());
 
 const formatDateChirho = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -75,14 +188,87 @@ const formatDateChirho = (dateString: string) => {
   });
 };
 
+const formatHourChirho = (hour: number) => {
+  const date = new Date();
+  date.setHours(hour, 0, 0, 0);
+  return date.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    hour12: true
+  });
+};
+
+const getSignupForHourChirho = (hour: number) => {
+  return scheduleChirho.value?.hourly_signups_chirho.find(
+    signup => new Date(signup.worship_hour_chirho).getHours() === hour
+  );
+};
+
 const loadChurchChirho = async () => {
   try {
     const tokenChirho = route.params.token_chirho as string;
     churchChirho.value = await getChurchByTokenChirho(tokenChirho);
+    await loadScheduleChirho();
   } catch (error) {
     console.error('Failed to load church:', error);
   } finally {
     loadingChirho.value = false;
+  }
+};
+
+const loadScheduleChirho = async () => {
+  if (!churchChirho.value) return;
+  
+  scheduleLoadingChirho.value = true;
+  try {
+    const dateStr = currentDateChirho.value.toISOString().split('T')[0];
+    scheduleChirho.value = await getScheduleChirho(churchChirho.value.church_id_chirho, dateStr);
+  } catch (error) {
+    console.error('Failed to load schedule:', error);
+  } finally {
+    scheduleLoadingChirho.value = false;
+  }
+};
+
+const previousDayChirho = () => {
+  currentDateChirho.value.setDate(currentDateChirho.value.getDate() - 1);
+  loadScheduleChirho();
+};
+
+const nextDayChirho = () => {
+  currentDateChirho.value.setDate(currentDateChirho.value.getDate() + 1);
+  loadScheduleChirho();
+};
+
+const openSignupModalChirho = (hour: number) => {
+  selectedHourChirho.value = hour;
+  showSignupModalChirho.value = true;
+};
+
+const closeSignupModalChirho = () => {
+  showSignupModalChirho.value = false;
+  signupNameChirho.value = '';
+  signupEmailChirho.value = '';
+};
+
+const submitSignupChirho = async () => {
+  if (!churchChirho.value || !scheduleChirho.value) return;
+
+  try {
+    const date = new Date(currentDateChirho.value);
+    date.setHours(selectedHourChirho.value, 0, 0, 0);
+
+    await createHourlySignupChirho({
+      schedule_id_chirho: scheduleChirho.value.schedule_id_chirho,
+      worship_hour_chirho: date.toISOString(),
+      worshiper_name_chirho: signupNameChirho.value,
+      worshiper_email_chirho: signupEmailChirho.value,
+      church_id_chirho: churchChirho.value.church_id_chirho
+    });
+
+    await loadScheduleChirho();
+    closeSignupModalChirho();
+  } catch (error) {
+    console.error('Failed to submit signup:', error);
   }
 };
 

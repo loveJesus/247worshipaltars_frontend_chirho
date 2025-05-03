@@ -21,7 +21,7 @@
         >
           View Churches
         </router-link>
-      </div>
+    </div>
       <div class="bg-white p-6 rounded-lg shadow">
         <h2 class="text-lg font-semibold mb-2">Schedule</h2>
         <p class="text-gray-600">Manage worship schedules</p>
@@ -43,5 +43,5 @@
 <style scoped>
 .dashboard-chirho {
   @apply p-4;
-}
+  }
 </style> 

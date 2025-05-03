@@ -126,27 +126,37 @@ export const deleteChurchChirho = async (church_id_chirho: string): Promise<void
 
 // Schedule endpoints
 export const getSchedulesChirho = async (query_chirho?: ScheduleQueryChirho): Promise<ScheduleChirho[]> => {
-  const response_chirho = await api_chirho.get('/api_chirho/admin_chirho/schedules_chirho', { params: query_chirho });
+  const response_chirho = await api_chirho.get('/api_chirho/admin_chirho/schedule_chirho', { params: query_chirho });
   return response_chirho.data;
 };
 
 export const getScheduleChirho = async (schedule_id_chirho: string): Promise<ScheduleChirho> => {
-  const response_chirho = await api_chirho.get(`/api_chirho/admin_chirho/schedules_chirho/${schedule_id_chirho}`);
+  const response_chirho = await api_chirho.get(`/api_chirho/admin_chirho/schedule_chirho/${schedule_id_chirho}`);
   return response_chirho.data;
 };
 
 export const createScheduleChirho = async (schedule_chirho: CreateScheduleChirho): Promise<ScheduleChirho> => {
-  const response_chirho = await api_chirho.post('/api_chirho/admin_chirho/schedules_chirho', schedule_chirho);
+  console.log('Creating schedule:', schedule_chirho);
+  const response_chirho = await api_chirho.post('/api_chirho/admin_chirho/schedule_chirho/assign_chirho', {
+    church_id_chirho: schedule_chirho.church_id_chirho,
+    worship_date_chirho: schedule_chirho.worship_date_chirho,
+    assigned_by_admin_id_chirho: "00000000-0000-0000-0000-000000000201"
+  });
   return response_chirho.data;
 };
 
 export const updateScheduleChirho = async (schedule_id_chirho: string, schedule_chirho: UpdateScheduleChirho): Promise<ScheduleChirho> => {
-  const response_chirho = await api_chirho.put(`/api_chirho/admin_chirho/schedules_chirho/${schedule_id_chirho}`, schedule_chirho);
-  return response_chirho.data;
+  const _response1_chirho = await api_chirho.delete(`/api_chirho/admin_chirho/schedule_chirho/unassign_chirho/${schedule_id_chirho}`);
+  const response2_chirho = await api_chirho.post('/api_chirho/admin_chirho/schedule_chirho/assign_chirho', {
+    church_id_chirho: schedule_chirho.church_id_chirho,
+    worship_date_chirho: schedule_chirho.worship_date_chirho,
+    assigned_by_admin_id_chirho: "00000000-0000-0000-0000-000000000201"
+  });
+  return response2_chirho.data;
 };
 
 export const deleteScheduleChirho = async (schedule_id_chirho: string): Promise<void> => {
-  await api_chirho.delete(`/api_chirho/admin_chirho/schedules_chirho/${schedule_id_chirho}`);
+  await api_chirho.delete(`/api_chirho/admin_chirho/schedule_chirho/unassign_chirho/${schedule_id_chirho}`);
 };
 
 export const assignScheduleChirho = async (church_id_chirho: string, worship_date_chirho: string): Promise<ScheduleChirho> => {
