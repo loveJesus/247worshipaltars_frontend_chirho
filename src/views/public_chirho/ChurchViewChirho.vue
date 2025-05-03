@@ -64,33 +64,33 @@
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
           </div>
           <div v-else-if="upcomingSchedulesChirho.length > 0" class="space-y-6">
-            <div v-for="schedule in upcomingSchedulesChirho" :key="schedule.schedule_id_chirho" class="border rounded-lg p-4">
+            <div v-for="scheduleChirho in upcomingSchedulesChirho" :key="scheduleChirho.schedule_id_chirho" class="border rounded-lg p-4">
               <div class="flex justify-between items-center mb-4">
                 <div>
                   <h3 class="text-lg font-semibold text-gray-900">
-                    {{ formatDateChirho(schedule.worship_date_chirho) }}
+                    {{ formatFirstDayHeaderChirho(scheduleChirho.worship_date_chirho) }}
                   </h3>
                 </div>
               </div>
               
               <!-- 24-hour grid -->
               <div class="grid grid-cols-1 gap-2">
-                <div v-for="hour in 24" :key="hour" class="border rounded p-2">
+                <div v-for="hourChirho in 24" :key="hourChirho" class="border rounded p-2">
                   <!-- Next day header -->
-                  <div v-if="hour === 6" class="mb-2 pb-2 border-b">
+                  <div v-if="churchChirho.worship_start_hour_chirho + hourChirho === 25" class="mb-2 pb-2 border-b">
                     <h4 class="text-sm font-semibold text-gray-700">
-                      {{ formatNextDayHeaderChirho(schedule.worship_date_chirho) }}
+                      {{ formatNextDayHeaderChirho(scheduleChirho.worship_date_chirho) }}
                     </h4>
                   </div>
                   <div class="flex justify-between items-center">
                     <div class="flex-1">
-                      <span class="font-medium">{{ formatHourChirho(hour, schedule.worship_date_chirho) }}</span>
-                      <div v-if="getSignupsForHourChirho(schedule.schedule_id_chirho, hour).length > 0" class="mt-1">
-                        <div v-for="signup in getSignupsForHourChirho(schedule.schedule_id_chirho, hour)" 
-                             :key="signup.signup_id_chirho" 
+                      <span class="font-medium">{{ formatHourChirho(hourChirho, scheduleChirho.worship_date_chirho) }}</span>
+                      <div v-if="getSignupsForHourChirho(scheduleChirho.schedule_id_chirho, hourChirho).length > 0" class="mt-1">
+                        <div v-for="signupChirho in getSignupsForHourChirho(scheduleChirho.schedule_id_chirho, hourChirho)" 
+                             :key="signupChirho.signup_id_chirho" 
                              class="flex items-center justify-between bg-gray-50 p-1 rounded">
-                          <span>{{ signup.participant_name_chirho }}</span>
-                          <button @click="deleteSignupChirho(signup.signup_id_chirho)" 
+                          <span>{{ signupChirho.participant_name_chirho }}</span>
+                          <button @click="openDeleteModalChirho(signupChirho.signup_id_chirho, signupChirho.participant_name_chirho)" 
                                   class="text-red-500 hover:text-red-700">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -100,7 +100,7 @@
                       </div>
                     </div>
                     <button 
-                      @click="openSignupModalChirho(hour, schedule.schedule_id_chirho)"
+                      @click="openSignupModalChirho(hourChirho, scheduleChirho.schedule_id_chirho)"
                       class="px-3 py-1 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700"
                     >
                       Sign Up
@@ -154,6 +154,28 @@
         </div>
       </div>
     </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div v-if="showDeleteModalChirho" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+      <div class="bg-white rounded-lg p-6 max-w-md w-full">
+        <h3 class="text-xl font-bold mb-4">✝️ Are you sure?</h3>
+        <p class="text-gray-700 mb-6">This will remove {{ selectedSignupNameChirho }} from the worship schedule.</p>
+        <div class="flex justify-end space-x-4">
+          <button 
+            @click="closeDeleteModalChirho"
+            class="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+          >
+            Cancel
+          </button>
+          <button 
+            @click="confirmDeleteSignupChirho"
+            class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -170,7 +192,7 @@ import {
   getScheduleSignupsChirho 
 } from '@/services/api_chirho';
 
-const route = useRoute();
+const routeChirho = useRoute();
 const churchChirho = ref<ChurchChirho | null>(null);
 const scheduleChirho = ref<ScheduleChirho | null>(null);
 const upcomingSchedulesChirho = ref<ScheduleChirho[]>([]);
@@ -185,9 +207,20 @@ const selectedScheduleWorshipDateChirho = ref('');
 const signupNameChirho = ref('');
 const signupEmailChirho = ref('');
 const currentDateChirho = ref(new Date());
+const showDeleteModalChirho = ref(false);
+const selectedSignupIdChirho = ref('');
+const selectedSignupNameChirho = ref('');
 
-const formatDateChirho = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('en-US', {
+const formatFirstDayHeaderChirho = (dateStringChirho: string) => {
+  if (!churchChirho.value) return '';
+  const start_hour_chirho = churchChirho.value.worship_start_hour_chirho;
+  const date_chirho = new Date(dateStringChirho);
+  date_chirho.setHours(start_hour_chirho, 0, 0, 0);
+  return formatDateChirho(date_chirho);
+}
+
+const formatDateChirho = (dateStringChirho: string) => {
+  return new Date(dateStringChirho).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -202,11 +235,10 @@ const formatWorshipStartTimeChirho = () => {
   const start_hour_chirho = churchChirho.value.worship_start_hour_chirho;
   const date_chirho = new Date();
   date_chirho.setHours(start_hour_chirho, 0, 0, 0);
-  
   return date_chirho.toLocaleTimeString('en-US', {
     hour: 'numeric',
     hour12: true,
-    timeZone: churchChirho.value.church_timezone_chirho
+    /* timeZone: churchChirho.value.church_timezone_chirho */
   });
 };
 
@@ -257,7 +289,7 @@ const getSignupsForHourChirho = (schedule_id_chirho: string, hour_chirho: number
   const actual_hour_chirho = (start_hour_chirho + hour_chirho) % 24;
   
   return hourlySignupsChirho.value[schedule_id_chirho]?.filter(
-    signup => signup.slot_hour_chirho === actual_hour_chirho
+    signupChirho => signupChirho.slot_hour_chirho === actual_hour_chirho
   ) || [];
 };
 
@@ -266,22 +298,86 @@ const loadScheduleSignupsChirho = async (schedule_id_chirho: string) => {
   
   try {
     const signups_chirho = await getScheduleSignupsChirho(
-      route.params.token_chirho as string,
+      routeChirho.params.token_chirho as string,
       schedule_id_chirho
     );
     hourlySignupsChirho.value[schedule_id_chirho] = signups_chirho;
-  } catch (error) {
-    console.error('Failed to load signups:', error);
+  } catch (errorChirho) {
+    console.error('Failed to load signups:', errorChirho);
   }
+};
+
+const setupWebSocketChirho = () => {
+  if (!churchChirho.value) return;
+  
+  const protocolChirho = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const wsUrlChirho = `${protocolChirho}//${window.location.hostname}:3000/ws_chirho/${churchChirho.value.church_id_chirho}`;
+  console.log('Connecting to WebSocket:', wsUrlChirho);
+  
+  const wsChirho = new WebSocket(wsUrlChirho);
+  
+  wsChirho.onopen = () => {
+    console.log('WebSocket connection established');
+  };
+  
+  wsChirho.onmessage = (eventChirho) => {
+    console.log('Received WebSocket message:', eventChirho.data);
+    try {
+      const messageChirho = JSON.parse(eventChirho.data);
+      
+      switch (messageChirho.type_chirho) {
+        case 'connected':
+          console.log('WebSocket connection confirmed for church_id:', messageChirho.church_id_chirho);
+          break;
+          
+        case 'signup_created':
+          console.log('Processing signup_created event:', messageChirho.data_chirho);
+          const scheduleIdChirho = messageChirho.data_chirho.schedule_id_chirho;
+          if (!hourlySignupsChirho.value[scheduleIdChirho]) {
+            hourlySignupsChirho.value[scheduleIdChirho] = [];
+          }
+          // Create a new array with the new signup to ensure reactivity
+          hourlySignupsChirho.value[scheduleIdChirho] = [
+            ...hourlySignupsChirho.value[scheduleIdChirho],
+            messageChirho.data_chirho.signup
+          ];
+          break;
+          
+        case 'signup_deleted':
+          console.log('Processing signup_deleted event:', messageChirho.data_chirho);
+          const scheduleIdChirho2 = messageChirho.data_chirho.schedule_id_chirho;
+          if (hourlySignupsChirho.value[scheduleIdChirho2]) {
+            // Create a new array without the deleted signup to ensure reactivity
+            hourlySignupsChirho.value[scheduleIdChirho2] = hourlySignupsChirho.value[scheduleIdChirho2].filter(
+              signupChirho => signupChirho.signup_id_chirho !== messageChirho.data_chirho.signup_id_chirho
+            );
+          }
+          break;
+      }
+    } catch (errorChirho) {
+      console.error('Failed to parse WebSocket message:', errorChirho);
+    }
+  };
+  
+  wsChirho.onerror = (errorChirho) => {
+    console.error('WebSocket error:', errorChirho);
+  };
+  
+  wsChirho.onclose = () => {
+    console.log('WebSocket connection closed, attempting to reconnect in 5 seconds...');
+    // Try to reconnect after 5 seconds
+    setTimeout(setupWebSocketChirho, 5000);
+  };
 };
 
 const loadChurchChirho = async () => {
   try {
-    const tokenChirho = route.params.token_chirho as string;
+    const tokenChirho = routeChirho.params.token_chirho as string;
     churchChirho.value = await getChurchByTokenChirho(tokenChirho);
     await loadUpcomingSchedulesChirho();
-  } catch (error) {
-    console.error('Failed to load church:', error);
+    setupWebSocketChirho();
+  } catch (errorChirho) {
+    console.error('Failed to load church:', errorChirho);
   } finally {
     loadingChirho.value = false;
   }
@@ -292,17 +388,17 @@ const loadUpcomingSchedulesChirho = async () => {
   
   scheduleLoadingChirho.value = true;
   try {
-    const schedules = await getUpcomingSchedulesChirho({
+    const schedulesChirho = await getUpcomingSchedulesChirho({
       church_id_chirho: churchChirho.value.church_id_chirho
     });
-    upcomingSchedulesChirho.value = schedules;
+    upcomingSchedulesChirho.value = schedulesChirho;
     
     // Load signups for each schedule
-    for (const schedule of schedules) {
-      await loadScheduleSignupsChirho(schedule.schedule_id_chirho);
+    for (const scheduleChirho of schedulesChirho) {
+      await loadScheduleSignupsChirho(scheduleChirho.schedule_id_chirho);
     }
-  } catch (error) {
-    console.error('Failed to load upcoming schedules:', error);
+  } catch (errorChirho) {
+    console.error('Failed to load upcoming schedules:', errorChirho);
   } finally {
     scheduleLoadingChirho.value = false;
   }
@@ -322,7 +418,7 @@ const openSignupModalChirho = (hour_chirho: number, schedule_id_chirho?: string)
   selectedScheduleIdChirho.value = schedule_id_chirho;
   
   // Store the worship date for the selected schedule
-  const schedule_chirho = upcomingSchedulesChirho.value.find(s => s.schedule_id_chirho === schedule_id_chirho);
+  const schedule_chirho = upcomingSchedulesChirho.value.find(sChirho => sChirho.schedule_id_chirho === schedule_id_chirho);
   if (schedule_chirho) {
     selectedScheduleWorshipDateChirho.value = schedule_chirho.worship_date_chirho;
   }
@@ -344,24 +440,39 @@ const submitSignupChirho = async () => {
       schedule_id_chirho: selectedScheduleIdChirho.value,
       slot_hour_chirho: selectedHourChirho.value,
       participant_name_chirho: signupNameChirho.value
-    }, route.params.token_chirho as string);
+    }, routeChirho.params.token_chirho as string);
 
     await loadScheduleSignupsChirho(selectedScheduleIdChirho.value);
     closeSignupModalChirho();
-  } catch (error) {
-    console.error('Failed to submit signup:', error);
+  } catch (errorChirho) {
+    console.error('Failed to submit signup:', errorChirho);
   }
 };
 
-const deleteSignupChirho = async (signup_id_chirho: string) => {
+const openDeleteModalChirho = (signupIdChirho: string, signupNameChirho: string) => {
+  selectedSignupIdChirho.value = signupIdChirho;
+  selectedSignupNameChirho.value = signupNameChirho;
+  showDeleteModalChirho.value = true;
+};
+
+const closeDeleteModalChirho = () => {
+  showDeleteModalChirho.value = false;
+  selectedSignupIdChirho.value = '';
+  selectedSignupNameChirho.value = '';
+};
+
+const confirmDeleteSignupChirho = async () => {
+  if (!selectedSignupIdChirho.value) return;
+  
   try {
-    await deleteHourlySignupChirho(signup_id_chirho, route.params.token_chirho as string);
+    await deleteHourlySignupChirho(selectedSignupIdChirho.value, routeChirho.params.token_chirho as string);
     // Reload signups for all schedules
-    for (const schedule of upcomingSchedulesChirho.value) {
-      await loadScheduleSignupsChirho(schedule.schedule_id_chirho);
+    for (const scheduleChirho of upcomingSchedulesChirho.value) {
+      await loadScheduleSignupsChirho(scheduleChirho.schedule_id_chirho);
     }
-  } catch (error) {
-    console.error('Failed to delete signup:', error);
+    closeDeleteModalChirho();
+  } catch (errorChirho) {
+    console.error('Failed to delete signup:', errorChirho);
   }
 };
 
