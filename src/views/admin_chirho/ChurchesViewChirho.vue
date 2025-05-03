@@ -13,6 +13,75 @@
       </button>
     </div>
 
+    <!-- Continent Tabs -->
+    <div class="bg-white shadow rounded-lg p-6 mb-8">
+      <div class="flex space-x-4 overflow-x-auto pb-2">
+        <button
+          @click="router.push({ query: {} })"
+          :class="[
+            'px-4 py-2 rounded-md text-sm font-medium',
+            !route.query.continent
+              ? 'bg-gray-600 text-white'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          ]"
+        >
+          All Continents
+        </button>
+        <button
+          v-for="continent in continentsChirho"
+          :key="continent.continent_id_chirho"
+          @click="router.push({ query: { continent: continent.continent_id_chirho } })"
+          :class="[
+            'px-4 py-2 rounded-md text-sm font-medium',
+            route.query.continent === continent.continent_id_chirho
+              ? `bg-${getContinentColorChirho(continent.continent_id_chirho)}-600 text-white`
+              : `bg-${getContinentColorChirho(continent.continent_id_chirho)}-100 text-${getContinentColorChirho(continent.continent_id_chirho)}-700 hover:bg-${getContinentColorChirho(continent.continent_id_chirho)}-200`
+          ]"
+        >
+          {{ continent.name_chirho }}
+          <span v-if="continent.centralized_timezone_chirho" class="ml-2 text-xs">
+            ({{ continent.centralized_timezone_chirho }})
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Edit Continent Timezone Modal -->
+    <div v-if="showEditTimezoneModalChirho" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+      <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3 text-center">
+          <h3 class="text-lg leading-6 font-medium text-gray-900">
+            Edit Timezone for {{ editingContinentChirho?.name_chirho }}
+          </h3>
+          <div class="mt-2 px-7 py-3">
+            <select
+              v-model="editingContinentChirho.centralized_timezone_chirho"
+              class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            >
+              <option value="">Select a Timezone</option>
+              <option v-for="timezoneChirho in timezonesChirho" :key="timezoneChirho" :value="timezoneChirho">
+                {{ timezoneChirho }}
+              </option>
+            </select>
+          </div>
+          <div class="items-center px-4 py-3">
+            <button
+              @click="saveContinentTimezoneChirho"
+              class="px-4 py-2 bg-indigo-600 text-white text-base font-medium rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              Save
+            </button>
+            <button
+              @click="showEditTimezoneModalChirho = false"
+              class="ml-3 px-4 py-2 bg-gray-200 text-gray-700 text-base font-medium rounded-md shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="bg-white shadow rounded-lg overflow-hidden">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
@@ -145,17 +214,19 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import type { ChurchChirho, CreateChurchChirho, UpdateChurchChirho, ContinentChirho } from '@/types/models_chirho';
 import {
   getChurchesChirho,
   createChurchChirho,
   updateChurchChirho,
   deleteChurchChirho,
-  getContinentsChirho
+  getContinentsChirho,
+  updateContinentChirho
 } from '@/services/api_chirho';
 
 const route = useRoute();
+const router = useRouter();
 const churchesChirho = ref<ChurchChirho[]>([]);
 const filteredChurchesChirho = ref<ChurchChirho[]>([]);
 const continentsChirho = ref<ContinentChirho[]>([]);
@@ -170,6 +241,9 @@ const churchFormChirho = ref<CreateChurchChirho>({
   admin_details_note_chirho: '',
   internal_notes_chirho: ''
 });
+
+const showEditTimezoneModalChirho = ref(false);
+const editingContinentChirho = ref<ContinentChirho | null>(null);
 
 // List of common timezones
 const timezonesChirho = [
@@ -289,6 +363,41 @@ const deleteChurchChirho = async (churchIdChirho: string) => {
     await loadChurchesChirho();
   } catch (error) {
     console.error('Failed to delete church:', error);
+  }
+};
+
+// Map continent IDs to colors
+const getContinentColorChirho = (continentIdChirho: string): string => {
+  const colorMapChirho: { [key: string]: string } = {
+    '1': 'blue',
+    '2': 'green',
+    '3': 'purple',
+    '4': 'red',
+    '5': 'yellow',
+    '6': 'indigo',
+    '7': 'pink'
+  };
+  return colorMapChirho[continentIdChirho] || 'gray';
+};
+
+const editContinentTimezoneChirho = (continent: ContinentChirho) => {
+  editingContinentChirho.value = { ...continent };
+  showEditTimezoneModalChirho.value = true;
+};
+
+const saveContinentTimezoneChirho = async () => {
+  if (!editingContinentChirho.value) return;
+  
+  try {
+    await updateContinentChirho(editingContinentChirho.value.continent_id_chirho, {
+      name_chirho: editingContinentChirho.value.name_chirho,
+      centralized_timezone_chirho: editingContinentChirho.value.centralized_timezone_chirho || null
+    });
+    await loadContinentsChirho();
+    showEditTimezoneModalChirho.value = false;
+    editingContinentChirho.value = null;
+  } catch (error) {
+    console.error('Failed to update continent timezone:', error);
   }
 };
 

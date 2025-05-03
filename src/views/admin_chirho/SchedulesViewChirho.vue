@@ -16,8 +16,8 @@
             :class="[
               'px-4 py-2 rounded-md text-sm font-medium',
               selectedContinentIdChirho === continent.continent_id_chirho
-                ? 'bg-indigo-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? `bg-${getContinentColorChirho(continent.continent_id_chirho)}-600 text-white`
+                : `bg-${getContinentColorChirho(continent.continent_id_chirho)}-100 text-${getContinentColorChirho(continent.continent_id_chirho)}-700 hover:bg-${getContinentColorChirho(continent.continent_id_chirho)}-200`
             ]"
           >
             {{ continent.name_chirho }}
@@ -69,7 +69,7 @@
                 class="min-h-32 p-2 border rounded-md"
                 :class="{
                   'bg-gray-50': !isCurrentMonthChirho(day.date),
-                  'border-indigo-200': hasScheduleChirho(day.date)
+                  [`border-${getContinentColorChirho(selectedContinentIdChirho)}-200`]: hasScheduleChirho(day.date)
                 }"
                 @dragover.prevent
                 @drop="handleDropChirho($event, day.date)"
@@ -80,7 +80,10 @@
                 <div
                   v-for="schedule in getSchedulesForDayChirho(day.date)"
                   :key="schedule.schedule_id_chirho"
-                  class="bg-indigo-100 text-indigo-800 rounded-md p-2 mb-2 text-sm cursor-move"
+                  :class="[
+                    `bg-${getContinentColorChirho(selectedContinentIdChirho)}-100 text-${getContinentColorChirho(selectedContinentIdChirho)}-800`,
+                    'rounded-md p-2 mb-2 text-sm cursor-move'
+                  ]"
                   draggable="true"
                   @dragstart="handleDragStartChirho($event, schedule)"
                 >
@@ -110,7 +113,10 @@
               <div
                 v-for="church in unassignedChurchesChirho"
                 :key="church.church_id_chirho"
-                class="bg-gray-100 text-gray-800 rounded-md p-2 text-sm cursor-move"
+                :class="[
+                  `bg-${getContinentColorChirho(selectedContinentIdChirho)}-100 text-${getContinentColorChirho(selectedContinentIdChirho)}-800`,
+                  'rounded-md p-2 text-sm cursor-move'
+                ]"
                 draggable="true"
                 @dragstart="handleDragStartChirho($event, { church_id_chirho: church.church_id_chirho })"
               >
@@ -145,6 +151,21 @@ const churchesChirho = ref<ChurchChirho[]>([]);
 const continentsChirho = ref<ContinentChirho[]>([]);
 const selectedContinentIdChirho = ref('');
 const currentDateChirho = ref(new Date());
+
+// Map continent IDs to colors
+const continentColorsChirho = {
+  '00000000-0000-0000-0000-000000000001': 'indigo', // Africa
+  '00000000-0000-0000-0000-000000000002': 'blue',   // Asia
+  '00000000-0000-0000-0000-000000000003': 'green',  // Europe
+  '00000000-0000-0000-0000-000000000004': 'red',    // North America
+  '00000000-0000-0000-0000-000000000005': 'purple', // South America
+  '00000000-0000-0000-0000-000000000006': 'yellow', // Oceania
+  '00000000-0000-0000-0000-000000000007': 'pink'    // Antarctica
+};
+
+const getContinentColorChirho = (continentIdChirho: string): string => {
+  return continentColorsChirho[continentIdChirho] || 'gray';
+};
 
 const daysOfWeekChirho = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -241,7 +262,9 @@ const isCurrentMonthChirho = (dateChirho: Date) => {
 const hasScheduleChirho = (dateChirho: Date) => {
   const targetDateStrChirho = formatDateToYYYYMMDDChirho(dateChirho);
   return schedulesChirho.value.some(
-    scheduleChirho => scheduleChirho.worship_date_chirho.split('T')[0] === targetDateStrChirho
+    scheduleChirho => 
+      scheduleChirho.worship_date_chirho.split('T')[0] === targetDateStrChirho &&
+      getChurchContinentIdChirho(scheduleChirho.church_id_chirho) === selectedContinentIdChirho.value
   );
 };
 
@@ -250,10 +273,16 @@ const getSchedulesForDayChirho = (dateChirho: Date) => {
   
   let filteredChirho = schedulesChirho.value.filter(scheduleChirho => {
     const scheduleDateStrChirho = scheduleChirho.worship_date_chirho.split('T')[0];
-    return scheduleDateStrChirho === targetDateStrChirho;
+    return scheduleDateStrChirho === targetDateStrChirho &&
+           getChurchContinentIdChirho(scheduleChirho.church_id_chirho) === selectedContinentIdChirho.value;
   });
 
   return filteredChirho;
+};
+
+const getChurchContinentIdChirho = (churchIdChirho: string): string => {
+  const churchChirho = churchesChirho.value.find(cChirho => cChirho.church_id_chirho === churchIdChirho);
+  return churchChirho?.continent_id_chirho || '';
 };
 
 const getChurchNameChirho = (churchIdChirho: string) => {
