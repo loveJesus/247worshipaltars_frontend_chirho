@@ -24,6 +24,12 @@
                 <h2 class="text-sm font-medium text-gray-500">Timezone</h2>
                 <p class="mt-1 text-lg text-gray-900">{{ churchChirho.church_timezone_chirho }}</p>
               </div>
+              <div>
+                <h2 class="text-sm font-medium text-gray-500">Worship Start Time</h2>
+                <p class="mt-1 text-lg text-gray-900">
+                  {{ formatWorshipStartTimeChirho() }}
+                </p>
+              </div>
             </div>
             
             <div class="space-y-4">
@@ -190,15 +196,31 @@ const formatDateChirho = (dateString: string) => {
   });
 };
 
+const formatWorshipStartTimeChirho = () => {
+  if (!churchChirho.value) return '';
+  
+  const start_hour_chirho = churchChirho.value.worship_start_hour_chirho;
+  const date_chirho = new Date();
+  date_chirho.setHours(start_hour_chirho, 0, 0, 0);
+  
+  return date_chirho.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    hour12: true,
+    timeZone: churchChirho.value.church_timezone_chirho
+  });
+};
+
 const formatHourChirho = (hour_chirho: number, worship_date_chirho: string) => {
-  if (!worship_date_chirho) return 'aleluya';
+  if (!worship_date_chirho) return '';
   
   // Create a date object for the worship date
   const worship_date_chirho_obj = new Date(worship_date_chirho);
   if (isNaN(worship_date_chirho_obj.getTime())) return '';
   
-  // Set the hour (6 PM is 18:00)
-  const start_hour_chirho = 17;
+  // Get the start hour from the church response (this is the hour in the church's timezone)
+  const start_hour_chirho = churchChirho.value?.worship_start_hour_chirho || 18;
+  
+  // Calculate the display hour (0-23) based on the start hour
   const display_hour_chirho = (start_hour_chirho + hour_chirho) % 24;
   
   // If the hour is after midnight, increment the date
@@ -230,8 +252,8 @@ const formatNextDayHeaderChirho = (worship_date_chirho: string) => {
 };
 
 const getSignupsForHourChirho = (schedule_id_chirho: string, hour_chirho: number) => {
-  // Convert the display hour (0-23) to the actual hour in the database (18-17)
-  const start_hour_chirho = 17;
+  // Get the start hour from the church response
+  const start_hour_chirho = churchChirho.value?.worship_start_hour_chirho || 18;
   const actual_hour_chirho = (start_hour_chirho + hour_chirho) % 24;
   
   return hourlySignupsChirho.value[schedule_id_chirho]?.filter(
@@ -292,8 +314,8 @@ const openSignupModalChirho = (hour_chirho: number, schedule_id_chirho?: string)
   // Store the display hour (0-23) for showing in the modal
   displayHourChirho.value = hour_chirho;
   
-  // Convert the display hour (0-23) to the actual hour in the database (17-16)
-  const start_hour_chirho = 17;
+  // Get the start hour from the church response
+  const start_hour_chirho = churchChirho.value?.worship_start_hour_chirho || 18;
   const actual_hour_chirho = (start_hour_chirho + hour_chirho) % 24;
   
   selectedHourChirho.value = actual_hour_chirho;
