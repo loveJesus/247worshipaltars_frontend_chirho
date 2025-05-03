@@ -179,8 +179,9 @@ export const getHourlySignupChirho = async (signup_id_chirho: string): Promise<H
   return response_chirho.data;
 };
 
-export const createHourlySignupChirho = async (signup_chirho: CreateHourlySignupChirho): Promise<HourlySignupChirho> => {
-  const response_chirho = await api_chirho.post('/api_chirho/admin_chirho/hourly_signups_chirho', signup_chirho);
+export const createHourlySignupChirho = async (signup_chirho: CreateHourlySignupChirho, church_token_chirho: string): Promise<HourlySignupChirho> => {
+  console.log('Creating hourly signup:', signup_chirho);
+  const response_chirho = await api_chirho.post(`/api_chirho/public_chirho/church_chirho/${church_token_chirho}/assign_to_schedule_chirho/${signup_chirho.schedule_id_chirho}`, signup_chirho);
   return response_chirho.data;
 };
 
