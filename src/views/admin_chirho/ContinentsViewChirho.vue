@@ -19,6 +19,9 @@
               Name
             </th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Churches
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Actions
             </th>
           </tr>
@@ -26,7 +29,15 @@
         <tbody class="bg-white divide-y divide-gray-200">
           <tr v-for="continentChirho in continentsChirho" :key="continentChirho.continent_id_chirho">
             <td class="px-6 py-4 whitespace-nowrap">
-              {{ continentChirho.name_chirho }}
+              <router-link
+                :to="`/admin_chirho/churches_chirho?continent=${continentChirho.continent_id_chirho}`"
+                class="text-indigo-600 hover:text-indigo-900"
+              >
+                {{ continentChirho.name_chirho }}
+              </router-link>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              {{ getChurchCountChirho(continentChirho.continent_id_chirho) }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
               <button
@@ -61,6 +72,12 @@
               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
               placeholder="Continent Name"
             />
+            <input
+              v-model="continentFormChirho.central_timezone_chirho"
+              type="text"
+              class="mt-4 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              placeholder="Central Timezone (e.g., America/New_York)"
+            />
           </div>
           <div class="items-center px-4 py-3">
             <button
@@ -84,19 +101,22 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import type { ContinentChirho, CreateContinentChirho, UpdateContinentChirho } from '@/types/models_chirho';
+import type { ContinentChirho, CreateContinentChirho, UpdateContinentChirho, ChurchChirho } from '@/types/models_chirho';
 import {
   getContinentsChirho,
   createContinentChirho,
   updateContinentChirho,
-  deleteContinentChirho
+  deleteContinentChirho,
+  getChurchesChirho
 } from '@/services/api_chirho';
 
 const continentsChirho = ref<ContinentChirho[]>([]);
+const churchesChirho = ref<ChurchChirho[]>([]);
 const showCreateModalChirho = ref(false);
 const editingContinentChirho = ref<ContinentChirho | null>(null);
 const continentFormChirho = ref<CreateContinentChirho>({
-  name_chirho: ''
+  name_chirho: '',
+  central_timezone_chirho: ''
 });
 
 const loadContinentsChirho = async () => {
@@ -107,9 +127,22 @@ const loadContinentsChirho = async () => {
   }
 };
 
+const loadChurchesChirho = async () => {
+  try {
+    churchesChirho.value = await getChurchesChirho();
+  } catch (error) {
+    console.error('Failed to load churches:', error);
+  }
+};
+
+const getChurchCountChirho = (continentIdChirho: string) => {
+  return churchesChirho.value.filter(church => church.continent_id_chirho === continentIdChirho).length;
+};
+
 const editContinentChirho = (continentChirho: ContinentChirho) => {
   editingContinentChirho.value = continentChirho;
   continentFormChirho.value.name_chirho = continentChirho.name_chirho;
+  continentFormChirho.value.central_timezone_chirho = continentChirho.central_timezone_chirho;
   showCreateModalChirho.value = true;
 };
 
@@ -124,6 +157,7 @@ const saveContinentChirho = async () => {
     showCreateModalChirho.value = false;
     editingContinentChirho.value = null;
     continentFormChirho.value.name_chirho = '';
+    continentFormChirho.value.central_timezone_chirho = '';
   } catch (error) {
     console.error('Failed to save continent:', error);
   }
@@ -140,6 +174,7 @@ const deleteContinentChirho = async (continentIdChirho: string) => {
 
 onMounted(() => {
   loadContinentsChirho();
+  loadChurchesChirho();
 });
 </script>
 

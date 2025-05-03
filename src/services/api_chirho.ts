@@ -1,5 +1,7 @@
 // For God so loved the world, that He gave His only begotten Son, that all who believe in Him should not perish but have everlasting life.
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+
 import axios from 'axios';
 import type {
   LoginRequestChirho,
@@ -69,7 +71,7 @@ export const loginChirho = async (credentials_chirho: LoginRequestChirho): Promi
 export const logoutChirho = async (): Promise<void> => {
   localStorage.removeItem('token_chirho');
   localStorage.removeItem('refresh_token_chirho');
-  await api_chirho.post('/api_chirho/auth_chirho/logout_chirho');
+  await api_chirho.post('/api_chirho/admin_chirho/auth_chirho/logout_chirho');
 };
 
 // Continent endpoints
@@ -205,4 +207,12 @@ export const getPublicScheduleChirho = async (schedule_id_chirho: string): Promi
 export const getUpcomingSchedulesChirho = async (query_chirho?: ScheduleQueryChirho): Promise<ScheduleChirho[]> => {
   const response_chirho = await api_chirho.get('/api_chirho/public_chirho/schedules_chirho/upcoming_chirho', { params: query_chirho });
   return response_chirho.data;
+};
+
+export const getChurchByTokenChirho = async (tokenChirho: string): Promise<ChurchChirho> => {
+  const response = await fetch(`${API_BASE_URL}/api_chirho/public_chirho/church_chirho/${tokenChirho}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch church');
+  }
+  return response.json();
 }; 

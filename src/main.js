@@ -5,9 +5,9 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 
-const app = createApp(App)
+const appChirho = createApp(App)
 
-app.use(createPinia())
-app.use(router)
+appChirho.use(createPinia())
+appChirho.use(router)
 
-app.mount('#app')
+appChirho.mount('#app')

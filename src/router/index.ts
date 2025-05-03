@@ -2,6 +2,7 @@
 
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStoreChirho } from '@/stores/auth_store_chirho';
+import ChurchViewChirho from '@/views/public_chirho/ChurchViewChirho.vue';
 
 const router_chirho = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -32,6 +33,14 @@ const router_chirho = createRouter({
           component: () => import('@/views/admin_chirho/ChurchesViewChirho.vue')
         }
       ]
+    },
+    {
+      path: '/church_chirho/:token_chirho',
+      name: 'ChurchViewChirho',
+      component: ChurchViewChirho,
+      meta: {
+        requiresAuth: false
+      }
     }
   ]
 });

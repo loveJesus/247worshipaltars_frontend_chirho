@@ -13,6 +13,8 @@ export interface ChurchChirho {
   name_chirho: string;
   continent_id_chirho: string;
   church_timezone_chirho: string;
+  leader_name_chirho: string;
+  leader_email_chirho: string;
   admin_details_note_chirho: string;
   internal_notes_chirho: string;
   member_access_token_chirho: string;
@@ -68,6 +70,8 @@ export interface CreateChurchChirho {
   name_chirho: string;
   continent_id_chirho: string;
   church_timezone_chirho: string;
+  leader_name_chirho: string;
+  leader_email_chirho: string;
   admin_details_note_chirho: string;
   internal_notes_chirho: string;
 }
@@ -76,6 +80,8 @@ export interface UpdateChurchChirho {
   name_chirho: string;
   continent_id_chirho: string;
   church_timezone_chirho: string;
+  leader_name_chirho: string;
+  leader_email_chirho: string;
   admin_details_note_chirho: string;
   internal_notes_chirho: string;
 }
