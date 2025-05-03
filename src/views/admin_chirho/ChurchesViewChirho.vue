@@ -6,7 +6,10 @@
         {{ route.query.continent ? `Churches in ${getContinentNameChirho(route.query.continent as string)}` : 'All Churches' }}
       </h1>
       <button
-        @click="showCreateModalChirho = true"
+        @click="() => {
+          resetFormChirho();
+          showCreateModalChirho = true;
+        }"
         class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
       >
         Add Church
@@ -143,54 +146,77 @@
             {{ editingChurchChirho ? 'Edit Church' : 'Add New Church' }}
           </h3>
           <div class="mt-2 px-7 py-3">
-            <input
-              v-model="churchFormChirho.name_chirho"
-              type="text"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              placeholder="Church Name"
-            />
-            <input
-              v-model="churchFormChirho.leader_name_chirho"
-              type="text"
-              class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              placeholder="Leader Name"
-            />
-            <input
-              v-model="churchFormChirho.leader_email_chirho"
-              type="email"
-              class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              placeholder="Leader Email"
-            />
-            <select
-              v-model="churchFormChirho.continent_id_chirho"
-              class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            >
-              <option value="">Select a Continent</option>
-              <option v-for="continentChirho in continentsChirho" :key="continentChirho.continent_id_chirho" :value="continentChirho.continent_id_chirho">
-                {{ continentChirho.name_chirho }}
-              </option>
-            </select>
-            <select
-              v-model="churchFormChirho.church_timezone_chirho"
-              class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            >
-              <option value="">Select a Timezone</option>
-              <option v-for="timezoneChirho in timezonesChirho" :key="timezoneChirho" :value="timezoneChirho">
-                {{ timezoneChirho }}
-              </option>
-            </select>
-            <textarea
-              v-model="churchFormChirho.admin_details_note_chirho"
-              class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              placeholder="Admin Notes"
-              rows="3"
-            ></textarea>
-            <textarea
-              v-model="churchFormChirho.internal_notes_chirho"
-              class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              placeholder="Internal Notes"
-              rows="3"
-            ></textarea>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Church Name *</label>
+              <input
+                v-model="churchFormChirho.name_chirho"
+                type="text"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                placeholder="Enter church name"
+                required
+              />
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Leader Name</label>
+              <input
+                v-model="churchFormChirho.leader_name_chirho"
+                type="text"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                placeholder="Enter leader name"
+              />
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Leader Email</label>
+              <input
+                v-model="churchFormChirho.leader_email_chirho"
+                type="email"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                placeholder="Enter leader email"
+              />
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Continent</label>
+              <select
+                v-model="churchFormChirho.continent_id_chirho"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              >
+                <option value="">Select a Continent</option>
+                <option v-for="continentChirho in continentsChirho" :key="continentChirho.continent_id_chirho" :value="continentChirho.continent_id_chirho">
+                  {{ continentChirho.name_chirho }}
+                </option>
+              </select>
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Timezone *</label>
+              <select
+                v-model="churchFormChirho.church_timezone_chirho"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                required
+              >
+                <option value="">Select a Timezone</option>
+                <option v-for="timezoneChirho in timezonesChirho" :key="timezoneChirho" :value="timezoneChirho">
+                  {{ timezoneChirho }}
+                </option>
+              </select>
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Admin Notes</label>
+              <textarea
+                v-model="churchFormChirho.admin_details_note_chirho"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                placeholder="Enter admin notes"
+                rows="3"
+              ></textarea>
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Public Notes</label>
+              <textarea
+                v-model="churchFormChirho.internal_notes_chirho"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                placeholder="Enter public notes"
+                rows="3"
+              ></textarea>
+            </div>
           </div>
           <div class="items-center px-4 py-3">
             <button
@@ -200,7 +226,7 @@
               Save
             </button>
             <button
-              @click="showCreateModalChirho = false"
+              @click="closeModalChirho"
               class="ml-3 px-4 py-2 bg-gray-200 text-gray-700 text-base font-medium rounded-md shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
             >
               Cancel
@@ -305,6 +331,24 @@ const getContinentNameChirho = (continentIdChirho: string | null) => {
   return continentChirho ? continentChirho.name_chirho : 'Unknown';
 };
 
+const resetFormChirho = () => {
+  editingChurchChirho.value = null;
+  churchFormChirho.value = {
+    name_chirho: '',
+    continent_id_chirho: route.query.continent as string || '',
+    church_timezone_chirho: '',
+    leader_name_chirho: '',
+    leader_email_chirho: '',
+    admin_details_note_chirho: '',
+    internal_notes_chirho: ''
+  };
+};
+
+const closeModalChirho = () => {
+  showCreateModalChirho.value = false;
+  resetFormChirho();
+};
+
 const editChurchChirho = (churchChirho: ChurchChirho) => {
   editingChurchChirho.value = churchChirho;
   churchFormChirho.value = {
@@ -322,12 +366,21 @@ const editChurchChirho = (churchChirho: ChurchChirho) => {
 const saveChurchChirho = async () => {
   try {
     if (!churchFormChirho.value.name_chirho || !churchFormChirho.value.church_timezone_chirho) {
-      console.error('Name and timezone are required');
+      alert('Please fill in all required fields (marked with *)');
       return;
     }
 
     if (editingChurchChirho.value) {
-      await updateChurchChirho(editingChurchChirho.value.church_id_chirho, churchFormChirho.value as UpdateChurchChirho);
+      await updateChurchChirho(editingChurchChirho.value.church_id_chirho, {
+        name_chirho: churchFormChirho.value.name_chirho,
+        continent_id_chirho: churchFormChirho.value.continent_id_chirho || null,
+        church_timezone_chirho: churchFormChirho.value.church_timezone_chirho,
+        leader_name_chirho: churchFormChirho.value.leader_name_chirho || null,
+        leader_email_chirho: churchFormChirho.value.leader_email_chirho || null,
+        admin_details_note_chirho: churchFormChirho.value.admin_details_note_chirho || null,
+        internal_notes_chirho: churchFormChirho.value.internal_notes_chirho || null,
+        member_access_token_chirho: editingChurchChirho.value.member_access_token_chirho
+      });
     } else {
       await createChurchChirho({
         name_chirho: churchFormChirho.value.name_chirho,
@@ -341,19 +394,10 @@ const saveChurchChirho = async () => {
       });
     }
     await loadChurchesChirho();
-    showCreateModalChirho.value = false;
-    editingChurchChirho.value = null;
-    churchFormChirho.value = {
-      name_chirho: '',
-      continent_id_chirho: '',
-      church_timezone_chirho: '',
-      leader_name_chirho: '',
-      leader_email_chirho: '',
-      admin_details_note_chirho: '',
-      internal_notes_chirho: ''
-    };
+    closeModalChirho();
   } catch (error) {
     console.error('Failed to save church:', error);
+    alert('Failed to save church. Please check all required fields and try again.');
   }
 };
 

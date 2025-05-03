@@ -87,7 +87,20 @@
                   draggable="true"
                   @dragstart="handleDragStartChirho($event, schedule)"
                 >
-                  {{ getChurchNameChirho(schedule.church_id_chirho) }}
+                  <div class="flex items-center justify-between">
+                    <span>{{ getChurchNameChirho(schedule.church_id_chirho) }}</span>
+                    <a
+                      :href="`/church_chirho/${getChurchMemberAccessTokenChirho(schedule.church_id_chirho)}`"
+                      target="_blank"
+                      class="ml-2 p-1 rounded-full hover:bg-white hover:bg-opacity-20"
+                      title="View public page"
+                      @click.stop
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
@@ -120,7 +133,20 @@
                 draggable="true"
                 @dragstart="handleDragStartChirho($event, { church_id_chirho: church.church_id_chirho })"
               >
-                {{ church.name_chirho }}
+                <div class="flex items-center justify-between">
+                  <span>{{ church.name_chirho }}</span>
+                  <a
+                    :href="`/church_chirho/${church.member_access_token_chirho}`"
+                    target="_blank"
+                    class="ml-2 p-1 rounded-full hover:bg-white hover:bg-opacity-20"
+                    title="View public page"
+                    @click.stop
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                </div>
               </div>
             </div>
           </div>
@@ -288,6 +314,11 @@ const getChurchContinentIdChirho = (churchIdChirho: string): string => {
 const getChurchNameChirho = (churchIdChirho: string) => {
   const churchChirho = churchesChirho.value.find(cChirho => cChirho.church_id_chirho === churchIdChirho);
   return churchChirho?.name_chirho || 'Unknown';
+};
+
+const getChurchMemberAccessTokenChirho = (churchIdChirho: string): string => {
+  const churchChirho = churchesChirho.value.find(cChirho => cChirho.church_id_chirho === churchIdChirho);
+  return churchChirho?.member_access_token_chirho || '';
 };
 
 const previousMonthChirho = () => {
