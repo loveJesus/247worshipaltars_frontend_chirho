@@ -1,7 +1,7 @@
 // For God so loved the world, that He gave His only begotten Son, that all who believe in Him should not perish but have everlasting life.
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
-
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+console.log('Hallelujah API_BASE_URL:', API_BASE_URL);
 import axios from 'axios';
 import type {
   LoginRequestChirho,
@@ -23,7 +23,7 @@ import type {
 import { useAuthStoreChirho } from '@/stores/auth_store_chirho';
 
 const api_chirho = axios.create({
-  baseURL: import.meta.env.VITE_API_URL_CHIRHO || 'http://localhost:3000',
+  baseURL: API_BASE_URL,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
