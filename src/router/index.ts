@@ -3,10 +3,16 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStoreChirho } from '@/stores/auth_store_chirho';
 import ChurchViewChirho from '@/views/public_chirho/ChurchViewChirho.vue';
+import IndexViewChirho from '@/views/IndexViewChirho.vue';
 
 const router_chirho = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    {
+      path: '/',
+      name: 'index',
+      component: IndexViewChirho
+    },
     {
       path: '/login_chirho',
       name: 'login_chirho',

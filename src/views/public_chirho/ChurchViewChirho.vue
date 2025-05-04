@@ -328,7 +328,8 @@ const setupWebSocketChirho = () => {
   if (!churchChirho.value) return;
   
   const protocolChirho = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  const wsUrlChirho = `${protocolChirho}//${window.location.hostname}:3000/ws_chirho/${churchChirho.value.church_id_chirho}`;
+  //const wsUrlChirho = `${protocolChirho}//${window.location.hostname}:3000/ws_chirho/${churchChirho.value.church_id_chirho}`;
+  const wsUrlChirho = `${protocolChirho}//${window.location.hostname}/ws_chirho/${churchChirho.value.church_id_chirho}`;
   console.log('Connecting to WebSocket:', wsUrlChirho);
   
   const wsChirho = new WebSocket(wsUrlChirho);
