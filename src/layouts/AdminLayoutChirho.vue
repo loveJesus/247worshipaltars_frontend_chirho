@@ -53,6 +53,17 @@
               >
                 Schedules
               </router-link>
+              <router-link
+                to="/admin_chirho/pdf_files_chirho"
+                :class="[
+                  'inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium',
+                  $route.path.startsWith('/admin_chirho/pdf_files_chirho') || $route.path === '/admin_chirho/pdf_files_chirho/'
+                    ? 'border-indigo-500 text-gray-900'
+                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                ]"
+              >
+                PDF Files
+              </router-link>
             </div>
           </div>
           <div class="flex items-center">

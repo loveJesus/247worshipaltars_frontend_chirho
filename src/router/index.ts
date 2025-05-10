@@ -42,6 +42,12 @@ const router_chirho = createRouter({
           path: 'schedules_chirho',
           name: 'schedules_chirho',
           component: () => import('@/views/admin_chirho/SchedulesViewChirho.vue')
+        },
+        {
+          path: 'pdf_files_chirho',
+          name: 'pdf_files_chirho',
+          component: () => import('../views/admin_chirho/PdfFilesViewChirho.vue'),
+          meta: { requiresAuth: true }
         }
       ]
     },
